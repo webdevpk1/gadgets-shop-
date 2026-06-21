@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FrostByte — Cooling Gadgets Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0f14;
+    --bg-soft:#0f161d;
+    --panel:#121a22;
+    --line:#1e2a33;
+    --ice:#5eead4;
+    --ice-bright:#7dffea;
+    --frost:#a8e6f0;
+    --text:#e8f1f3;
+    --text-dim:#8aa0a8;
+    --warn:#ff8a65;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  .mono{font-family:'JetBrains Mono', monospace;}
+
+  /* background frost texture */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 600px 400px at 15% -5%, rgba(94,234,212,0.10), transparent 60%),
+      radial-gradient(ellipse 500px 500px at 110% 20%, rgba(94,234,212,0.07), transparent 60%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  a{color:inherit; text-decoration:none;}
+  img,svg{display:block; max-width:100%;}
+
+  /* ===== NAV ===== */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,15,20,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-wrap{
+    max-width:1180px; margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-weight:700; font-size:1.25rem; letter-spacing:-0.02em;
+  }
+  .logo-mark{
+    width:34px; height:34px;
+    display:grid; place-items:center;
+  }
+  .nav-links{display:flex; align-items:center; gap:28px;}
+  .nav-links a{font-size:0.92rem; color:var(--text-dim); transition:color .2s;}
+  .nav-links a:hover{color:var(--ice);}
+  .cart-btn{
+    position:relative;
+    display:flex; align-items:center; gap:8px;
+    background:var(--panel); border:1px solid var(--line);
+    padding:9px 16px; border-radius:999px;
+    font-size:0.88rem; cursor:pointer; color:var(--text);
+    transition:border-color .2s;
+  }
+  .cart-btn:hover{border-color:var(--ice);}
+  .cart-count{
+    background:var(--ice); color:#06231f;
+    font-weight:700; font-size:0.72rem;
+    min-width:18px; height:18px; border-radius:999px;
+    display:grid; place-items:center; padding:0 4px;
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    position:relative; z-index:1;
+    max-width:1180px; margin:0 auto;
+    padding:88px 24px 70px;
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px;
+    align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem; color:var(--ice);
+    border:1px solid rgba(94,234,212,0.3);
+    background:rgba(94,234,212,0.06);
+    padding:6px 12px; border-radius:999px;
+    margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--ice); animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.3;}}
+  .hero h1{
+    font-size:clamp(2.3rem, 5vw, 3.6rem);
+    font-weight:700; letter-spacing:-0.03em; line-height:1.05;
+    margin-bottom:20px;
+  }
+  .hero h1 .accent{color:var(--ice);}
+  .hero p{
+    color:var(--text-dim); font-size:1.05rem; max-width:480px; margin-bottom:30px;
+  }
+  .hero-cta{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{
+    padding:13px 26px; border-radius:10px;
+    font-weight:600; font-size:0.95rem;
+    cursor:pointer; border:none; transition:transform .15s, box-shadow .15s;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary{background:var(--ice); color:#06231f;}
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 8px 24px rgba(94,234,212,0.25);}
+  .btn-outline{background:transparent; color:var(--text); border:1px solid var(--line);}
+  .btn-outline:hover{border-color:var(--ice); color:var(--ice);}
+
+  .hero-visual{
+    position:relative;
+    display:grid; place-items:center;
+    height:380px;
+  }
+  .hero-ring{
+    position:absolute; width:340px; height:340px; border-radius:50%;
+    border:1px dashed rgba(94,234,212,0.25);
+    animation:spin 30s linear infinite;
+  }
+  .hero-ring.r2{width:260px; height:260px; animation-duration:22s; animation-direction:reverse;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ===== STRIP ===== */
+  .strip{
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    background:var(--bg-soft);
+  }
+  .strip-wrap{
+    max-width:1180px; margin:0 auto; padding:20px 24px;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+  }
+  .strip-item{text-align:center; font-size:0.82rem; color:var(--text-dim);}
+  .strip-item b{display:block; color:var(--text); font-size:1.0rem; margin-bottom:2px;}
+
+  /* ===== PRODUCTS ===== */
+  .section{max-width:1180px; margin:0 auto; padding:80px 24px;}
+  .section-head{margin-bottom:40px;}
+  .section-tag{font-family:'JetBrains Mono'; font-size:0.78rem; color:var(--ice); letter-spacing:0.05em; text-transform:uppercase;}
+  .section-head h2{font-size:clamp(1.7rem,3vw,2.3rem); font-weight:700; letter-spacing:-0.02em; margin-top:8px;}
+
+  .grid{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:20px;
+  }
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    overflow:hidden; display:flex; flex-direction:column;
+    transition:border-color .25s, transform .25s;
+  }
+  .card:hover{border-color:rgba(94,234,212,0.4); transform:translateY(-4px);}
+  .card-img{
+    aspect-ratio:1/1;
+    background:radial-gradient(circle at 50% 30%, rgba(94,234,212,0.10), transparent 70%), #0c131a;
+    display:grid; place-items:center;
+    border-bottom:1px solid var(--line);
+    padding:18px;
+  }
+  .card-body{padding:18px 18px 20px; display:flex; flex-direction:column; gap:10px; flex:1;}
+  .card-cat{font-family:'JetBrains Mono'; font-size:0.68rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em;}
+  .card-title{font-weight:600; font-size:1.02rem; letter-spacing:-0.01em;}
+  .card-desc{font-size:0.83rem; color:var(--text-dim); flex:1;}
+  .card-footer{display:flex; align-items:center; justify-content:space-between; margin-top:6px;}
+  .price{font-family:'JetBrains Mono'; font-weight:700; font-size:1.15rem; color:var(--ice);}
+  .price-sub{font-size:0.68rem; color:var(--text-dim); display:block; font-weight:400;}
+  .add-btn{
+    background:transparent; border:1px solid var(--line); color:var(--text);
+    width:38px; height:38px; border-radius:9px; cursor:pointer;
+    display:grid; place-items:center; font-size:1.1rem;
+    transition:all .2s;
+  }
+  .add-btn:hover{background:var(--ice); border-color:var(--ice); color:#06231f;}
+
+  /* ===== WHY US ===== */
+  .why-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
+  .why-card{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:var(--radius);
+    padding:26px;
+  }
+  .why-card .ic{width:38px; height:38px; margin-bottom:16px;}
+  .why-card h3{font-size:1.05rem; margin-bottom:8px; font-weight:600;}
+  .why-card p{font-size:0.86rem; color:var(--text-dim);}
+
+  /* ===== PAYMENT STRIP ===== */
+  .pay-section{background:var(--bg-soft); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .pay-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:30px;}
+  .pay-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:20px; text-align:center; transition:border-color .2s;
+  }
+  .pay-card:hover{border-color:var(--ice);}
+  .pay-card svg{margin:0 auto 12px;}
+  .pay-card span{font-size:0.85rem; font-weight:600; display:block;}
+
+  /* ===== FOOTER ===== */
+  footer{padding:50px 24px 30px; border-top:1px solid var(--line);}
+  .footer-wrap{max-width:1180px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
+  .footer-wrap p{font-size:0.82rem; color:var(--text-dim);}
+
+  /* ===== CART DRAWER ===== */
+  .overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.55);
+    z-index:90; opacity:0; pointer-events:none; transition:opacity .25s;
+  }
+  .overlay.open{opacity:1; pointer-events:auto;}
+  .drawer{
+    position:fixed; top:0; right:0; height:100vh; width:420px; max-width:92vw;
+    background:var(--bg-soft); border-left:1px solid var(--line);
+    z-index:100; transform:translateX(100%); transition:transform .3s ease;
+    display:flex; flex-direction:column;
+  }
+  .drawer.open{transform:translateX(0);}
+  .drawer-head{
+    padding:22px 22px 18px; border-bottom:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .drawer-head h3{font-size:1.15rem; font-weight:700;}
+  .close-btn{background:none; border:none; color:var(--text-dim); font-size:1.4rem; cursor:pointer; line-height:1;}
+  .close-btn:hover{color:var(--text);}
+  .drawer-body{flex:1; overflow-y:auto; padding:18px 22px;}
+  .cart-item{display:flex; gap:12px; padding:14px 0; border-bottom:1px solid var(--line);}
+  .cart-item-img{width:60px; height:60px; border-radius:8px; background:#0c131a; display:grid; place-items:center; flex-shrink:0; border:1px solid var(--line);}
+  .cart-item-info{flex:1;}
+  .cart-item-info h4{font-size:0.92rem; font-weight:600; margin-bottom:4px;}
+  .cart-item-info .price{font-size:0.92rem;}
+  .qty-row{display:flex; align-items:center; gap:10px; margin-top:8px;}
+  .qty-btn{
+    width:24px; height:24px; border-radius:6px; border:1px solid var(--line); background:var(--panel);
+    color:var(--text); cursor:pointer; font-size:0.9rem; display:grid; place-items:center;
+  }
+  .remove-btn{font-size:0.74rem; color:var(--warn); cursor:pointer; margin-top:8px; display:inline-block;}
+  .empty-cart{color:var(--text-dim); text-align:center; padding:60px 0; font-size:0.9rem;}
+  .drawer-foot{padding:20px 22px 26px; border-top:1px solid var(--line);}
+  .total-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; font-size:1.05rem; font-weight:700;}
+  .total-row .price{font-size:1.3rem;}
+
+  /* ===== CHECKOUT MODAL ===== */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.65);
+    z-index:110; display:none; align-items:flex-start; justify-content:center;
+    padding:40px 16px; overflow-y:auto;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:16px;
+    width:100%; max-width:480px; padding:30px;
+  }
+  .modal h3{font-size:1.3rem; font-weight:700; margin-bottom:6px;}
+  .modal .sub{color:var(--text-dim); font-size:0.86rem; margin-bottom:24px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:0.82rem; color:var(--text-dim); margin-bottom:6px;}
+  .field input, .field textarea{
+    width:100%; background:var(--panel); border:1px solid var(--line); border-radius:9px;
+    padding:11px 13px; color:var(--text); font-family:inherit; font-size:0.92rem;
+  }
+  .field input:focus, .field textarea:focus{outline:none; border-color:var(--ice);}
+  .pay-options{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;}
+  .pay-option{
+    border:1px solid var(--line); border-radius:10px; padding:12px;
+    display:flex; align-items:center; gap:10px; cursor:pointer; font-size:0.84rem; font-weight:600;
+    transition:all .2s;
+  }
+  .pay-option.selected{border-color:var(--ice); background:rgba(94,234,212,0.06);}
+  .pay-option input{accent-color:var(--ice); width:16px; height:16px;}
+  .order-summary{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:20px; font-size:0.85rem;}
+  .order-summary .row{display:flex; justify-content:space-between; padding:4px 0; color:var(--text-dim);}
+  .order-summary .row.total{color:var(--text); font-weight:700; border-top:1px solid var(--line); margin-top:8px; padding-top:10px;}
+  .full-btn{width:100%; justify-content:center;}
+  .modal-note{font-size:0.76rem; color:var(--text-dim); text-align:center; margin-top:14px; line-height:1.5;}
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px);
+    background:var(--ice); color:#06231f; font-weight:600; font-size:0.88rem;
+    padding:13px 24px; border-radius:999px; z-index:200; transition:transform .3s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:880px){
+    .hero{grid-template-columns:1fr; padding-top:50px;}
+    .hero-visual{height:260px; order:-1;}
+    .nav-links{display:none;}
+    .strip-wrap{grid-template-columns:repeat(2,1fr);}
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .why-grid{grid-template-columns:1fr;}
+    .pay-grid{grid-template-columns:repeat(2,1fr);}
+    .pay-options{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-wrap">
+    <div class="logo">
+      <span class="logo-mark">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+          <circle cx="17" cy="17" r="16" stroke="#5eead4" stroke-width="1.5"/>
+          <path d="M17 6 L17 28 M7.5 11.5 L26.5 22.5 M26.5 11.5 L7.5 22.5" stroke="#5eead4" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="17" cy="17" r="3" fill="#5eead4"/>
+        </svg>
+      </span>
+      FrostByte
+    </div>
+    <nav class="nav-links">
+      <a href="#shop">Shop</a>
+      <a href="#why">Why Us</a>
+      <a href="#payment">Payment</a>
+      <a href="#footer">Contact</a>
+    </nav>
+    <button class="cart-btn" onclick="openCart()">
+      🛒 Cart <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div>
+    <div class="eyebrow"><span class="dot"></span> AB STOCK MEIN — FAST DELIVERY ALL PAKISTAN</div>
+    <h1>Apne devices ko rakhain<br><span class="accent">hamesha cool.</span></h1>
+    <p>Premium cooling fans aur smartwatches — gaming, video calls aur daily use ke liye. Order karein chand seconds mein, JazzCash, EasyPaisa, PayPal ya card se.</p>
+    <div class="hero-cta">
+      <a href="#shop" class="btn btn-primary">Shop Karein →</a>
+      <a href="#why" class="btn btn-outline">Mazeed Janein</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-ring"></div>
+    <div class="hero-ring r2"></div>
+    <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
+      <circle cx="100" cy="100" r="70" fill="#0f161d" stroke="#5eead4" stroke-width="1.5"/>
+      <g id="heroFan">
+        <path d="M100 100 C100 60, 70 50, 60 70 C75 80, 90 90, 100 100 Z" fill="#5eead4" opacity="0.85"/>
+        <path d="M100 100 C140 100, 150 70, 130 60 C120 75, 110 90, 100 100 Z" fill="#5eead4" opacity="0.7"/>
+        <path d="M100 100 C100 140, 130 150, 140 130 C125 120, 110 110, 100 100 Z" fill="#5eead4" opacity="0.85"/>
+        <path d="M100 100 C60 100, 50 130, 70 140 C80 125, 90 110, 100 100 Z" fill="#5eead4" opacity="0.7"/>
+      </g>
+      <circle cx="100" cy="100" r="10" fill="#0a0f14" stroke="#5eead4" stroke-width="2"/>
+      <animateTransform xlink:href="#heroFan" attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4s" repeatCount="indefinite"/>
+    </svg>
+  </div>
+</section>
+
+<div class="strip">
+  <div class="strip-wrap">
+    <div class="strip-item"><b>4 Products</b>Premium Selection</div>
+    <div class="strip-item"><b>Cash on Order</b>JazzCash / EasyPaisa</div>
+    <div class="strip-item"><b>Pak-Wide</b>Delivery Available</div>
+    <div class="strip-item"><b>1 Year</b>Warranty Support</div>
+  </div>
+</div>
+
+<section class="section" id="shop">
+  <div class="section-head">
+    <div class="section-tag">// Our Products</div>
+    <h2>Cooling Fans &amp; Smartwatches</h2>
+  </div>
+  <div class="grid" id="productGrid"></div>
+</section>
+
+<section class="section" id="why">
+  <div class="section-head">
+    <div class="section-tag">// Why FrostByte</div>
+    <h2>Cool tech, garam guarantee nahi.</h2>
+  </div>
+  <div class="why-grid">
+    <div class="why-card">
+      <svg class="ic" viewBox="0 0 38 38" fill="none"><circle cx="19" cy="19" r="17" stroke="#5eead4" stroke-width="1.5"/><path d="M19 10v18M11 14l16 10M27 14L11 24" stroke="#5eead4" stroke-width="1.5"/></svg>
+      <h3>Powerful Cooling</h3>
+      <p>High-RPM motors jo aapke device ko 10°C tak thanda rakhain — gaming aur long calls ke dauran bhi.</p>
+    </div>
+    <div class="why-card">
+      <svg class="ic" viewBox="0 0 38 38" fill="none"><rect x="7" y="4" width="24" height="30" rx="4" stroke="#5eead4" stroke-width="1.5"/><circle cx="19" cy="27" r="1.6" fill="#5eead4"/></svg>
+      <h3>Easy Local Payments</h3>
+      <p>JazzCash, EasyPaisa, PayPal aur Credit/Debit card — jo bhi aapko suit kare.</p>
+    </div>
+    <div class="why-card">
+      <svg class="ic" viewBox="0 0 38 38" fill="none"><path d="M5 19l8 8L33 9" stroke="#5eead4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h3>Quality Checked</h3>
+      <p>Har item dispatch se pehle test hota hai. 1 year warranty ke sath mukammal sukoon.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pay-section" id="payment">
+  <div class="section" style="padding-bottom:60px;">
+    <div class="section-head">
+      <div class="section-tag">// Payment Methods</div>
+      <h2>Jis tarah se chahein, pay karein.</h2>
+    </div>
+    <div class="pay-grid">
+      <div class="pay-card">
+        <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="9" fill="#ff5722"/><text x="20" y="25" text-anchor="middle" font-family="Space Grotesk" font-size="11" font-weight="700" fill="white">JC</text></svg>
+        <span>JazzCash</span>
+      </div>
+      <div class="pay-card">
+        <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="9" fill="#0e8a3e"/><text x="20" y="25" text-anchor="middle" font-family="Space Grotesk" font-size="10" font-weight="700" fill="white">EP</text></svg>
+        <span>EasyPaisa</span>
+      </div>
+      <div class="pay-card">
+        <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="9" fill="#1a3a8f"/><text x="20" y="25" text-anchor="middle" font-family="Space Grotesk" font-size="9" font-weight="700" fill="white">PP</text></svg>
+        <span>PayPal</span>
+      </div>
+      <div class="pay-card">
+        <svg width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" rx="9" fill="#374151"/><rect x="6" y="14" width="28" height="5" fill="#5eead4"/></svg>
+        <span>Credit Card</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="footer">
+  <div class="footer-wrap">
+    <div class="logo" style="font-size:1.05rem;">
+      <span class="logo-mark">
+        <svg width="28" height="28" viewBox="0 0 34 34" fill="none">
+          <circle cx="17" cy="17" r="16" stroke="#5eead4" stroke-width="1.5"/>
+          <path d="M17 6 L17 28 M7.5 11.5 L26.5 22.5 M26.5 11.5 L7.5 22.5" stroke="#5eead4" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="17" cy="17" r="3" fill="#5eead4"/>
+        </svg>
+      </span>
+      FrostByte
+    </div>
+    <p>© 2026 FrostByte Gadgets. Saari rights mehfooz hain. WhatsApp: +92 3XX XXXXXXX</p>
+  </div>
+</footer>
+
+<!-- CART DRAWER -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>Aapka Cart</h3>
+    <button class="close-btn" onclick="closeCart()">&times;</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot">
+    <div class="total-row"><span>Total</span><span class="price mono" id="cartTotal">Rs 0</span></div>
+    <button class="btn btn-primary full-btn" onclick="openCheckout()">Checkout Karein →</button>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkoutOverlay">
+  <div class="modal">
+    <h3>Order Confirm Karein</h3>
+    <p class="sub">Apni details fill karein — order WhatsApp/Email par confirm hoga.</p>
+
+    <div class="order-summary" id="orderSummaryBox"></div>
+
+    <div class="field">
+      <label>Pura Naam</label>
+      <input type="text" id="custName" placeholder="Aapka naam">
+    </div>
+    <div class="field">
+      <label>Mobile Number</label>
+      <input type="tel" id="custPhone" placeholder="03XX-XXXXXXX">
+    </div>
+    <div class="field">
+      <label>Delivery Address</label>
+      <textarea id="custAddress" rows="2" placeholder="Ghar/Shop number, Street, Shehar"></textarea>
+    </div>
+
+    <label style="display:block; font-size:0.82rem; color:var(--text-dim); margin-bottom:10px;">Payment Method</label>
+    <div class="pay-options" id="payOptions">
+      <label class="pay-option" data-val="JazzCash"><input type="radio" name="paymethod" value="JazzCash">📱 JazzCash</label>
+      <label class="pay-option" data-val="EasyPaisa"><input type="radio" name="paymethod" value="EasyPaisa">💚 EasyPaisa</label>
+      <label class="pay-option" data-val="PayPal"><input type="radio" name="paymethod" value="PayPal">🅿️ PayPal</label>
+      <label class="pay-option" data-val="Credit Card"><input type="radio" name="paymethod" value="Credit Card">💳 Credit Card</label>
+    </div>
+
+    <button class="btn btn-primary full-btn" onclick="submitOrder()">Order Place Karein ✓</button>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button class="btn btn-outline full-btn" onclick="closeCheckout()" style="font-size:0.85rem; padding:10px;">Wapas Jayein</button>
+    </div>
+    <p class="modal-note">Hum static (GitHub Pages) site hain, is liye payment yahan charge nahi hoti. Order submit karne par aapki details WhatsApp/Email par chali jayengi aur seller payment instructions (JazzCash/EasyPaisa number ya PayPal/Card link) bhej kar order confirm karega.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== PRODUCT DATA ===================== */
+const products = [
+  {
+    id: 'ipad-fan',
+    name: 'iPad Cooling Fan',
+    cat: 'Tablet Cooling',
+    desc: 'iPad ke liye clip-on cooling fan — gaming aur video editing ke dauran overheating khatam.',
+    price: 4900,
+    img: 'ipadFan'
+  },
+  {
+    id: 'mobile-fan',
+    name: 'Mobile Cooling Fan',
+    cat: 'Phone Cooling',
+    desc: 'Compact clip fan jo seedha phone par lagta hai — PUBG/Free Fire sessions ke liye perfect.',
+    price: 2900,
+    img: 'mobileFan'
+  },
+  {
+    id: 'aura-watch',
+    name: 'Aura Watch',
+    cat: 'Smartwatch',
+    desc: 'Minimal round-dial smartwatch — health tracking aur notifications, lambi battery life.',
+    price: 1600,
+    img: 'auraWatch'
+  },
+  {
+    id: 'smartwatch',
+    name: 'SmartWatch Pro',
+    cat: 'Smartwatch',
+    desc: 'Square-dial smartwatch full touch display ke sath, calls aur fitness tracking ke liye.',
+    price: 2300,
+    img: 'smartWatch'
+  }
+];
+
+/* ===================== CUSTOM SVG IMAGES ===================== */
+function svgIpadFan(){
+  return `<svg width="160" height="160" viewBox="0 0 160 160">
+    <rect x="30" y="14" width="100" height="132" rx="12" fill="#1a242c" stroke="#2c3a44" stroke-width="2"/>
+    <rect x="38" y="22" width="84" height="108" rx="3" fill="#0c1318"/>
+    <rect x="38" y="22" width="84" height="108" rx="3" fill="url(#screenGrad)" opacity="0.5"/>
+    <circle cx="80" cy="138" r="3" fill="#3a4a54"/>
+    <g transform="translate(108,40)">
+      <rect x="-2" y="-2" width="38" height="38" rx="8" fill="#0a0f14" stroke="#5eead4" stroke-width="1.5"/>
+      <g id="ipadBlade">
+        <path d="M17 17 C17 4, 5 1, 1 9 C7 13, 12 15, 17 17 Z" fill="#5eead4" opacity="0.9"/>
+        <path d="M17 17 C30 17, 33 5, 25 1 C21 7, 19 12, 17 17 Z" fill="#5eead4" opacity="0.7"/>
+        <path d="M17 17 C17 30, 29 33, 33 25, 27 21, 22 19, 17 17 Z" fill="#5eead4" opacity="0.9"/>
+        <path d="M17 17 C4 17, 1 29, 9 33, 13 27, 15 22, 17 17 Z" fill="#5eead4" opacity="0.7"/>
+        <animateTransform attributeName="transform" type="rotate" from="0 17 17" to="360 17 17" dur="1.6s" repeatCount="indefinite"/>
+      </g>
+      <circle cx="17" cy="17" r="3.5" fill="#0a0f14" stroke="#5eead4" stroke-width="1.2"/>
+    </g>
+    <defs>
+      <linearGradient id="screenGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#5eead4" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#0c1318" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+  </svg>`;
+}
+
+function svgMobileFan(){
+  return `<svg width="160" height="160" viewBox="0 0 160 160">
+    <rect x="58" y="20" width="50" height="100" rx="10" fill="#1a242c" stroke="#2c3a44" stroke-width="2"/>
+    <rect x="63" y="27" width="40" height="78" rx="2" fill="#0c1318"/>
+    <rect x="63" y="27" width="40" height="78" rx="2" fill="url(#screenGrad2)" opacity="0.5"/>
+    <circle cx="83" cy="113" r="2.5" fill="#3a4a54"/>
+    <g transform="translate(96,16)">
+      <rect x="-3" y="-3" width="42" height="42" rx="9" fill="#0a0f14" stroke="#5eead4" stroke-width="1.5"/>
+      <g id="mobBlade">
+        <path d="M18 18 C18 5, 6 2, 2 10 C8 14, 13 16, 18 18 Z" fill="#5eead4" opacity="0.9"/>
+        <path d="M18 18 C31 18, 34 6, 26 2 C22 8, 20 13, 18 18 Z" fill="#5eead4" opacity="0.7"/>
+        <path d="M18 18 C18 31, 30 34, 34 26, 28 22, 23 20, 18 18 Z" fill="#5eead4" opacity="0.9"/>
+        <path d="M18 18 C5 18, 2 30, 10 34, 14 28, 16 23, 18 18 Z" fill="#5eead4" opacity="0.7"/>
+        <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1.3s" repeatCount="indefinite"/>
+      </g>
+      <circle cx="18" cy="18" r="3.5" fill="#0a0f14" stroke="#5eead4" stroke-width="1.2"/>
+    </g>
+    <defs>
+      <linearGradient id="screenGrad2" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#5eead4" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#0c1318" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+  </svg>`;
+}
+
+function svgAuraWatch(){
+  return `<svg width="160" height="160" viewBox="0 0 160 160">
+    <rect x="68" y="6" width="24" height="26" rx="6" fill="#1a242c" stroke="#2c3a44" stroke-width="1.5"/>
+    <rect x="68" y="128" width="24" height="26" rx="6" fill="#1a242c" stroke="#2c3a44" stroke-width="1.5"/>
+    <circle cx="80" cy="80" r="46" fill="#13202a" stroke="#5eead4" stroke-width="2.5"/>
+    <circle cx="80" cy="80" r="38" fill="#0a1118"/>
+    <circle cx="80" cy="80" r="38" fill="url(#watchGrad)" opacity="0.4"/>
+    <g stroke="#5eead4" stroke-width="1" opacity="0.5">
+      <line x1="80" y1="46" x2="80" y2="52"/>
+      <line x1="114" y1="80" x2="108" y2="80"/>
+      <line x1="80" y1="114" x2="80" y2="108"/>
+      <line x1="46" y1="80" x2="52" y2="80"/>
+    </g>
+    <line x1="80" y1="80" x2="80" y2="58" stroke="#7dffea" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="80" y1="80" x2="98" y2="88" stroke="#5eead4" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+    <circle cx="80" cy="80" r="3" fill="#7dffea"/>
+    <rect x="120" y="74" width="6" height="12" rx="2" fill="#2c3a44"/>
+    <defs>
+      <radialGradient id="watchGrad"><stop offset="0%" stop-color="#5eead4" stop-opacity="0.3"/><stop offset="100%" stop-color="#0a1118" stop-opacity="0"/></radialGradient>
+    </defs>
+  </svg>`;
+}
+
+function svgSmartWatch(){
+  return `<svg width="160" height="160" viewBox="0 0 160 160">
+    <rect x="68" y="4" width="24" height="24" rx="6" fill="#1a242c" stroke="#2c3a44" stroke-width="1.5"/>
+    <rect x="68" y="132" width="24" height="24" rx="6" fill="#1a242c" stroke="#2c3a44" stroke-width="1.5"/>
+    <rect x="38" y="36" width="84" height="88" rx="16" fill="#13202a" stroke="#5eead4" stroke-width="2.5"/>
+    <rect x="46" y="44" width="68" height="72" rx="9" fill="#0a1118"/>
+    <rect x="46" y="44" width="68" height="72" rx="9" fill="url(#sqGrad)" opacity="0.45"/>
+    <text x="80" y="78" text-anchor="middle" font-family="JetBrains Mono" font-size="16" fill="#7dffea" font-weight="700">9:41</text>
+    <rect x="62" y="88" width="36" height="4" rx="2" fill="#5eead4" opacity="0.7"/>
+    <rect x="68" y="98" width="24" height="4" rx="2" fill="#5eead4" opacity="0.4"/>
+    <circle cx="125" cy="60" r="3" fill="#2c3a44"/>
+    <defs>
+      <linearGradient id="sqGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#5eead4" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#0a1118" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+  </svg>`;
+}
+
+const imgRenderers = { ipadFan: svgIpadFan, mobileFan: svgMobileFan, auraWatch: svgAuraWatch, smartWatch: svgSmartWatch };
+
+/* ===================== RENDER PRODUCTS ===================== */
+const grid = document.getElementById('productGrid');
+products.forEach(p => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="card-img">${imgRenderers[p.img]()}</div>
+    <div class="card-body">
+      <div class="card-cat">${p.cat}</div>
+      <div class="card-title">${p.name}</div>
+      <div class="card-desc">${p.desc}</div>
+      <div class="card-footer">
+        <div class="price mono">Rs ${p.price.toLocaleString()}<span class="price-sub">PKR</span></div>
+        <button class="add-btn" onclick="addToCart('${p.id}')" title="Add to cart">+</button>
+      </div>
+    </div>
+  `;
+  grid.appendChild(card);
+});
+
+/* ===================== CART LOGIC ===================== */
+let cart = {}; // {id: qty}
+
+function addToCart(id){
+  cart[id] = (cart[id] || 0) + 1;
+  renderCart();
+  showToast(`${products.find(p=>p.id===id).name} cart mein add ho gaya ✓`);
+  openCart();
+}
+function changeQty(id, delta){
+  if(!cart[id]) return;
+  cart[id] += delta;
+  if(cart[id] <= 0) delete cart[id];
+  renderCart();
+}
+function removeItem(id){
+  delete cart[id];
+  renderCart();
+}
+function cartTotalValue(){
+  return Object.entries(cart).reduce((sum,[id,qty]) => {
+    const p = products.find(x=>x.id===id);
+    return sum + (p.price * qty);
+  }, 0);
+}
+function renderCart(){
+  const body = document.getElementById('drawerBody');
+  const ids = Object.keys(cart);
+  const countEl = document.getElementById('cartCount');
+  countEl.textContent = ids.reduce((s,id)=>s+cart[id],0);
+
+  if(ids.length === 0){
+    body.innerHTML = `<div class="empty-cart">Aapka cart khali hai.<br>Shopping shuru karein!</div>`;
+  } else {
+    body.innerHTML = ids.map(id => {
+      const p = products.find(x=>x.id===id);
+      return `
+        <div class="cart-item">
+          <div class="cart-item-img">${imgRenderers[p.img]().replace('width="160" height="160"','width="50" height="50"')}</div>
+          <div class="cart-item-info">
+            <h4>${p.name}</h4>
+            <div class="price mono">Rs ${(p.price*cart[id]).toLocaleString()}</div>
+            <div class="qty-row">
+              <button class="qty-btn" onclick="changeQty('${id}',-1)">−</button>
+              <span class="mono">${cart[id]}</span>
+              <button class="qty-btn" onclick="changeQty('${id}',1)">+</button>
+            </div>
+            <span class="remove-btn" onclick="removeItem('${id}')">Remove</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  document.getElementById('cartTotal').textContent = `Rs ${cartTotalValue().toLocaleString()}`;
+}
+renderCart();
+
+function openCart(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+function closeCart(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+/* ===================== CHECKOUT ===================== */
+let selectedPayMethod = null;
+
+document.querySelectorAll('.pay-option').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.pay-option').forEach(o=>o.classList.remove('selected'));
+    opt.classList.add('selected');
+    opt.querySelector('input').checked = true;
+    selectedPayMethod = opt.dataset.val;
+  });
+});
+
+function openCheckout(){
+  if(Object.keys(cart).length === 0){
+    showToast('Pehle cart mein products add karein');
+    return;
+  }
+  const box = document.getElementById('orderSummaryBox');
+  box.innerHTML = Object.keys(cart).map(id => {
+    const p = products.find(x=>x.id===id);
+    return `<div class="row"><span>${p.name} × ${cart[id]}</span><span>Rs ${(p.price*cart[id]).toLocaleString()}</span></div>`;
+  }).join('') + `<div class="row total"><span>Total</span><span>Rs ${cartTotalValue().toLocaleString()}</span></div>`;
+
+  closeCart();
+  document.getElementById('checkoutOverlay').classList.add('open');
+}
+function closeCheckout(){
+  document.getElementById('checkoutOverlay').classList.remove('open');
+}
+
+function submitOrder(){
+  const name = document.getElementById('custName').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const address = document.getElementById('custAddress').value.trim();
+
+  if(!name || !phone || !address){
+    showToast('Meharbani karke saari fields fill karein');
+    return;
+  }
+  if(!selectedPayMethod){
+    showToast('Payment method select karein');
+    return;
+  }
+
+  const orderLines = Object.keys(cart).map(id => {
+    const p = products.find(x=>x.id===id);
+    return `${p.name} x${cart[id]} = Rs ${(p.price*cart[id]).toLocaleString()}`;
+  }).join('%0A');
+
+  const message = `Naya Order — FrostByte%0A%0ANaam: ${encodeURIComponent(name)}%0APhone: ${encodeURIComponent(phone)}%0AAddress: ${encodeURIComponent(address)}%0APayment: ${encodeURIComponent(selectedPayMethod)}%0A%0AItems:%0A${orderLines}%0A%0ATotal: Rs ${cartTotalValue().toLocaleString()}`;
+
+  // Opens WhatsApp with the order pre-filled — seller number ko yahan update karein
+  const whatsappNumber = '923000000000'; // TODO: apna actual WhatsApp number yahan daalein (countrycode+number, no +/spaces)
+  window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+
+  closeCheckout();
+  cart = {};
+  renderCart();
+  showToast('Order WhatsApp par bhej diya gaya — confirmation ka intezar karein ✓');
+}
+
+/* ===================== TOAST ===================== */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+</script>
+
+</body>
+</html>
